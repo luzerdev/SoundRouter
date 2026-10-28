@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoundRouter</title>
+<style>
+  :root {
+    --bg: #fbfbfd; --surface: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --border: #e3e3e8;
+    --accent: #0a66d8; --accent-soft: #e8f1fc; --code-bg: #f3f3f6; --warn: #b25e00; --warn-soft: #fff4e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161618; --surface: #1f1f22; --text: #f2f2f4; --muted: #a1a1a6; --border: #333338;
+      --accent: #4d9bff; --accent-soft: #1b2a3f; --code-bg: #2a2a2e; --warn: #ffb35c; --warn-soft: #3a2a14;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161618; --surface: #1f1f22; --text: #f2f2f4; --muted: #a1a1a6; --border: #333338;
+    --accent: #4d9bff; --accent-soft: #1b2a3f; --code-bg: #2a2a2e; --warn: #ffb35c; --warn-soft: #3a2a14;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+  .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
+  nav {
+    position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    padding: 32px 16px; border-right: 1px solid var(--border);
+  }
+  nav .brand { font-weight: 700; font-size: 18px; margin-bottom: 20px; display: flex; gap: 8px; align-items: center; }
+  nav a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 14px; }
+  nav a:hover { color: var(--text); background: var(--accent-soft); }
+  main { padding: 40px 48px 96px; min-width: 0; }
+  h1 { font-size: 40px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 26px; margin: 56px 0 12px; padding-top: 8px; letter-spacing: -0.01em; }
+  h3 { font-size: 18px; margin: 28px 0 8px; }
+  p, li { color: var(--text); }
+  .lead { font-size: 19px; color: var(--muted); max-width: 720px; }
+  code { font: 13.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace; background: var(--code-bg); padding: 2px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 16px 18px; border-radius: 10px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .card h4 { margin: 0 0 6px; font-size: 15px; }
+  .card p { margin: 0; font-size: 14px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .note { background: var(--accent-soft); border-radius: 10px; padding: 14px 18px; margin: 18px 0; }
+  .warn { background: var(--warn-soft); border-radius: 10px; padding: 14px 18px; margin: 18px 0; }
+  .warn strong { color: var(--warn); }
+  ol.steps li { margin-bottom: 8px; }
+  kbd { font: 12.5px ui-monospace, Menlo, monospace; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; background: var(--surface); }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; font-size: 14px; }
+  .flow span { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  .flow b { color: var(--muted); font-weight: 400; }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 16px; }
+    nav a { display: inline-block; }
+    main { padding: 24px 16px 64px; }
+    h1 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">🔀 SoundRouter</div>
+  <a href="#overview">Overview</a>
+  <a href="#build">Build &amp; run</a>
+  <a href="#first-run">First run &amp; permissions</a>
+  <a href="#apps">Per-app routing</a>
+  <a href="#ipad">iPad &amp; input play-through</a>
+  <a href="#rules">Rules, priority &amp; fallbacks</a>
+  <a href="#effects">Volume boost, EQ &amp; effects</a>
+  <a href="#service">Menu bar &amp; always-on</a>
+  <a href="#tools">Tools</a>
+  <a href="#shortcuts">Shortcuts</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#troubleshooting">Troubleshooting</a>
+  <a href="#status">Project status</a>
+</nav>
+
+<main>
+<h1 id="overview">SoundRouter</h1>
+<p class="lead">A native macOS app (Swift, SwiftUI, Core Audio) that sends each app's audio to the output you choose, plays input devices like an iPad through any output, and switches things automatically when devices come and go. It replaces the Audio MIDI Setup + LadioCast routine and covers the core SoundSource features.</p>
+
+<div class="grid">
+  <div class="card"><h4>Per-app routing</h4><p>Chrome → Speakers, Music → Headset, at the same time, each with its own volume up to 400%.</p></div>
+  <div class="card"><h4>Input play-through</h4><p>iPad, mic, interface or capture card → any output, no LadioCast. One switch enables the iPad.</p></div>
+  <div class="card"><h4>Rules &amp; fallbacks</h4><p>Priority lists and triggers. When a device is missing: alert, alert and use another device, or alert and silence.</p></div>
+  <div class="card"><h4>SoundSource-style effects</h4><p>Boost, balance, Magic Boost, a 10-band EQ, headphone EQ per device, and any Audio Unit plug-in.</p></div>
+  <div class="card"><h4>Menu bar + window</h4><p>Full window for setup and a compact menu bar panel for everyday use. Can hide the Dock icon.</p></div>
+  <div class="card"><h4>Always on</h4><p>Starts at login, relaunches if it crashes, and includes a privileged helper that restarts Core Audio.</p></div>
+</div>
+
+<div class="note">No virtual audio driver is installed. Per-app capture uses Apple's <strong>Core Audio process taps</strong> (<code>CATapDescription</code>, macOS 14.2+), and this project targets <strong>macOS 27</strong>.</div>
+
+<h2 id="build">Build &amp; run</h2>
+<p>The repo includes <code>SoundRouter.xcodeproj</code>. Its source folders are synchronized groups, so new files under <code>Sources/App</code>, <code>Sources/Shared</code> or <code>Sources/Helper</code> are picked up without editing the project.</p>
+<p>The app icon is an Icon Composer file, <code>Sources/App/Resources/AppIcon.icon</code> (open it with Xcode › Open Developer Tool › Icon Composer). The menu bar icon and accent color are in <code>Sources/App/Resources/Assets.xcassets</code>.</p>
+<pre><code>cd SoundRouter
+open SoundRouter.xcodeproj
+# or from the command line:
+xcodebuild -project SoundRouter.xcodeproj -scheme SoundRouter build</code></pre>
+<ol class="steps">
+  <li>In Xcode, select the <strong>SoundRouter</strong> target → <em>Signing &amp; Capabilities</em> and pick your team. Do the same for <strong>SoundRouterHelper</strong>. Without a team, it builds ad-hoc signed ("Sign to Run Locally"), which is enough to compile but not for the helper daemon or login items.</li>
+  <li>If you change the bundle ID, keep the helper's ID as <code>&lt;app id&gt;.Helper</code>. The helper uses it to verify that only this app can call it.</li>
+  <li>Build and run with <kbd>⌘R</kbd>. For a real install, use <em>Product › Archive</em>, export a Developer ID-signed copy, and put it in <code>/Applications</code>. Login items and the helper daemon work best from <code>/Applications</code>.</li>
+</ol>
+
+<table>
+  <tr><th>Target</th><th>What it is</th></tr>
+  <tr><td><code>SoundRouter</code></td><td>The app: window, menu bar extra, audio engine. It isn't sandboxed and has the hardened runtime and audio-input entitlement.</td></tr>
+  <tr><td><code>SoundRouterHelper</code></td><td>A tiny LaunchDaemon, registered with <code>SMAppService.daemon</code> and embedded in <code>Contents/MacOS</code>. Its only job is restarting <code>coreaudiod</code>.</td></tr>
+</table>
+
+<h2 id="first-run">First run &amp; permissions</h2>
+<table>
+  <tr><th>Prompt</th><th>Why</th><th>When</th></tr>
+  <tr><td>System Audio Recording</td><td>Needed to tap other apps' audio (<code>NSAudioCaptureUsageDescription</code>)</td><td>The first time an app is routed</td></tr>
+  <tr><td>Microphone</td><td>Needed to read input devices such as the iPad or a mic</td><td>When you add the first input route</td></tr>
+  <tr><td>Notifications</td><td>Fallback and rule alerts</td><td>At launch</td></tr>
+  <tr><td>Accessibility</td><td>Lets the volume keys control devices that have no hardware volume</td><td>Only if you turn that option on</td></tr>
+  <tr><td>Login Items approval</td><td>Start at login, always-on, and the helper</td><td>When you enable them</td></tr>
+</table>
+<p>If audio capture was denied, re-enable it in <em>System Settings › Privacy &amp; Security › Screen &amp; System Audio Recording</em>.</p>
+
+<h2 id="apps">Per-app routing</h2>
+<p>Open the <strong>Apps</strong> page. Every app that uses audio is listed with a level meter, a volume slider (0–400%), mute, and an output menu.</p>
+<div class="flow"><span>Chrome</span><b>→</b><span>process tap (original muted)</span><b>→</b><span>effects</span><b>→</b><span>MacBook Speakers</span></div>
+<div class="flow"><span>Music</span><b>→</b><span>process tap (original muted)</span><b>→</b><span>effects</span><b>→</b><span>Headset</span></div>
+<ul>
+  <li><strong>Quick:</strong> pick an output from the row's menu.</li>
+  <li><strong>Priority list:</strong> click <kbd>⚙︎</kbd> (the sliders icon) and add several outputs in order, e.g. Headset → AirPods → Speakers. The app always uses the first one that's connected and moves back when a higher one reconnects.</li>
+  <li><strong>Play on all:</strong> send one app to several outputs at once.</li>
+  <li><strong>Apps not running yet:</strong> use <em>Add App</em> in the toolbar to create a route in advance. It applies as soon as the app makes sound.</li>
+  <li>Helper processes (Chrome's renderer, Safari's WebContent) are grouped under their app automatically.</li>
+  <li>An app left on <em>System Default</em> at 100% with no effects isn't touched at all, so it adds no latency.</li>
+</ul>
+
+<h2 id="ipad">iPad &amp; input play-through</h2>
+<p>This replaces the old routine: <em>Audio MIDI Setup → Enable iPad → LadioCast → Headset</em>.</p>
+<ol class="steps">
+  <li>On <strong>Inputs</strong>, turn on <strong>Enable iPad &amp; iPhone audio</strong>. This does what “Enable” in Audio MIDI Setup does: it sets <code>kCMIOHardwarePropertyAllowScreenCaptureDevices</code>.</li>
+  <li>Connect the iPad with a cable, unlock it, and tap Trust if asked. It appears in the list.</li>
+  <li>Click <strong>Play Through…</strong>, choose the output (e.g. Headset), and optionally add fallbacks, volume and EQ.</li>
+</ol>
+<p>From then on, the route starts by itself whenever the iPad is plugged in and stops when it's unplugged. Any other input works the same way: mics, interfaces, capture cards, even a specific channel pair of a multichannel interface.</p>
+<div class="note">For the lowest latency, match sample rates (Tools › Match sample rates) and use a smaller buffer on the output device (Devices › Buffer size).</div>
+
+<h2 id="rules">Rules, priority &amp; fallbacks</h2>
+<h3>Fallback when an output is missing (per route)</h3>
+<table>
+  <tr><th>Option</th><th>What happens</th></tr>
+  <tr><td>Use another device</td><td>Plays on the fallback device you pick (or the system default) until a preferred one returns</td></tr>
+  <tr><td>Silence</td><td>The app is muted until a preferred output returns</td></tr>
+  <tr><td>Leave on current output</td><td>SoundRouter steps aside and macOS plays it as usual</td></tr>
+  <tr><td>Show an alert</td><td>Works with any of the above. You get a notification when the route falls back and when it's restored.</td></tr>
+</table>
+<h3>Device priority (per profile)</h3>
+<p>Ordered lists of preferred default output and input devices. When devices connect or disconnect, the highest connected one becomes the system default.</p>
+<h3>Rules (global)</h3>
+<p>Triggers: device connects or disconnects, app launches or quits. Actions: set default output, input or sound-effects device, set a device's volume, switch profile, turn an app or input route on or off, show a notification. Example: <em>when “Headset” connects → switch to profile “Headphones”</em>.</p>
+<h3>Profiles</h3>
+<p>Each profile holds its own app routes, input routes and device priority, e.g. “Desk”, “Headphones only”, “Streaming”. Switch from the toolbar, the menu bar, a rule, or <kbd>⌃⌥⌘P</kbd>.</p>
+
+<h2 id="effects">Volume boost, EQ &amp; effects</h2>
+<p>Every app route, input route and output device has the same effect chain, processed in this order:</p>
+<div class="flow"><span>10-band EQ</span><b>→</b><span>Magic Boost</span><b>→</b><span>Audio Units</span><b>→</b><span>Volume &amp; balance</span><b>→</b><span>output-device chain</span><b>→</b><span>limiter</span></div>
+<ul>
+  <li><strong>Volume up to 400%</strong>, with a peak limiter at the end so boosted audio doesn't clip.</li>
+  <li><strong>Magic Boost</strong>: a compressor plus makeup gain that lifts quiet dialogue.</li>
+  <li><strong>EQ</strong>: 32 Hz – 16 kHz, ±12 dB, with built-in presets (Bass Boost, Voice, Loudness, Headphones…) and your own saved presets.</li>
+  <li><strong>Audio Units</strong>: add any installed effect (Apple's AUReverb, AUDelay, AUDynamicsProcessor, or third-party plug-ins), reorder or bypass them, and open their editor. Settings are saved with the route.</li>
+  <li><strong>Headphone EQ</strong>: set EQ on an output device (Devices page) and it applies wherever that device is used. Turn on <em>Settings › Process all audio</em> to apply it to apps without routes too.</li>
+  <li><strong>Software volume</strong> for HDMI and USB devices that macOS can't control, either from the menu bar or with the volume keys (Settings).</li>
+</ul>
+
+<h2 id="service">Menu bar &amp; always-on</h2>
+<table>
+  <tr><th>Setting</th><th>Mechanism</th></tr>
+  <tr><td>Start at login</td><td><code>SMAppService.mainApp</code></td></tr>
+  <tr><td>Always on</td><td><code>SMAppService.agent</code> with <code>app.soundrouter.keepalive.plist</code> (<code>KeepAlive.SuccessfulExit = false</code>). It relaunches after a crash but not after you choose Quit.</td></tr>
+  <tr><td>Show in Dock</td><td>Switches between <code>.regular</code> and <code>.accessory</code> activation policy. The menu bar icon is always shown.</td></tr>
+</table>
+<p>Closing the window keeps SoundRouter running in the menu bar. When it quits, every tap is removed and apps go back to normal output immediately. Taps and aggregates are private to the process, so the system cleans them up even after a crash.</p>
+
+<h2 id="tools">Tools</h2>
+<ul>
+  <li><strong>Restart Core Audio</strong>: through the helper if it's installed (no password), otherwise through an administrator prompt. Routes rebuild afterwards. SoundRouter also detects restarts it didn't start and rebuilds.</li>
+  <li><strong>Rebuild all routes</strong>: tears down and recreates every tap and stream.</li>
+  <li><strong>Match sample rates</strong> between an input and an output.</li>
+  <li>Device inspector: default output, input and sound-effects device; hardware volume and mute; sample rate; buffer size.</li>
+  <li>Export, import or reset the configuration. It's stored at <code>~/Library/Application Support/SoundRouter/config.json</code>.</li>
+</ul>
+
+<h2 id="shortcuts">Shortcuts</h2>
+<table>
+  <tr><td><kbd>⌃⌥⌘P</kbd></td><td>Next profile</td></tr>
+  <tr><td><kbd>⌃⌥⌘M</kbd></td><td>Panic mute all routed audio</td></tr>
+  <tr><td><kbd>⌃⌥⌘O</kbd></td><td>Cycle the default output</td></tr>
+  <tr><td><kbd>⌃⌥⌘R</kbd></td><td>Rebuild routes</td></tr>
+  <tr><td>Volume keys</td><td>Software volume for devices without hardware volume (optional; <kbd>⌥⇧</kbd> gives fine steps)</td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<table>
+  <tr><th>Folder / file</th><th>Responsibility</th></tr>
+  <tr><td><code>App/AppState.swift</code></td><td>Root model. Reacts to device and app events, runs rules and device priority, and converts the active profile into <code>StreamSpec</code>s (the planner). Handles fallbacks and alerts.</td></tr>
+  <tr><td><code>Audio/RouteEngine.swift</code></td><td>Compares the wanted streams with the running ones. Creates and destroys taps, private aggregate devices and IOProcs, and loads Audio Units.</td></tr>
+  <tr><td><code>Audio/ProcessTap.swift</code></td><td>Wraps <code>CATapDescription</code> and <code>AudioHardwareCreateProcessTap</code>, plus aggregate-device creation.</td></tr>
+  <tr><td><code>Audio/DeviceManager.swift</code></td><td>Device list, hot-plug and default-device listeners, volume, mute, sample rate, buffer size.</td></tr>
+  <tr><td><code>Audio/ProcessMonitor.swift</code></td><td>Core Audio process objects grouped by owning app (through the “responsible PID”), plus launch and quit events.</td></tr>
+  <tr><td><code>Audio/IOSDeviceEnabler.swift</code></td><td>The CoreMediaIO switch that exposes iPad/iPhone audio.</td></tr>
+  <tr><td><code>DSP/*</code></td><td>Real-time processing: <code>StreamProcessor</code> (render callback), <code>EffectProcessor</code> (lock-free parameter swap), biquad EQ, compressor, limiter, <code>AURenderer</code> (hosts Audio Units in the IOProc).</td></tr>
+  <tr><td><code>Model/Models.swift</code></td><td>Codable config: profiles, routes, rules, effects, settings.</td></tr>
+  <tr><td><code>Services/*</code></td><td>Persistence, notifications, helper XPC client and launch registration, hot keys, volume keys, HUD.</td></tr>
+  <tr><td><code>UI/*</code></td><td>SwiftUI views for the window and the menu bar.</td></tr>
+  <tr><td><code>Helper/main.swift</code></td><td>Privileged daemon. It accepts XPC only from code signed with the same team ID and the app's bundle identifier.</td></tr>
+</table>
+<p><strong>How one app route works:</strong> SoundRouter creates a process tap on the app's processes with <code>muteBehavior = .mutedWhenTapped</code>, then a private aggregate device made of the target output plus the tap (drift-compensated). Its IOProc reads the tap's stereo channels, runs the effect stages, and writes to the output. An input route uses an aggregate of the input device (drift-compensated) and the output device.</p>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+  <tr><th>Symptom</th><th>Try</th></tr>
+  <tr><td>Routed app is silent</td><td>Check audio-capture permission. Look for an error under the app row. Then Tools › Rebuild routes.</td></tr>
+  <tr><td>iPad doesn't appear</td><td>Unlock it, trust the Mac, try another cable or port, and toggle the switch off and on. As a last resort, click Enable in Audio MIDI Setup once; SoundRouter takes over from there.</td></tr>
+  <tr><td>Crackles in play-through</td><td>Match sample rates and raise the buffer size slightly.</td></tr>
+  <tr><td>Helper says “requires approval”</td><td>System Settings › General › Login Items &amp; Extensions → allow SoundRouter.</td></tr>
+  <tr><td>Everything is stuck</td><td>Tools › Restart Core Audio, or quit SoundRouter. All apps return to normal output.</td></tr>
+</table>
+
+<h2 id="status">Project status</h2>
+<div class="warn"><strong>Builds; core routing tested.</strong> Both targets compile against the macOS 27 SDK (Xcode 27.1) with no errors or warnings. Per-app routing has been run end to end: the app starts a tap stream when a routed app plays, follows the app's processes as instances come and go, and stops when it quits. The UI, input routes, effects, rules and the helper haven't been exercised yet. The APIs that were most at risk, and how they turned out:
+<ul>
+  <li><code>CATapDescription</code> Swift names (<code>isPrivate</code>, <code>processes</code> as <code>[AudioObjectID]</code>) and updating a tap's process list in place through <code>kAudioTapPropertyDescription</code>. These names compile as written, and the in-place update works: the tap keeps its ID while processes are added and removed. It needs audio-capture permission; without it the HAL returns <code>'!hog'</code> and the engine falls back to rebuilding the stream.</li>
+  <li><code>AUAudioUnit.instantiate(with:options:)</code> async form and <code>.defaultLaunchBehavior</code> on the window scene compile as written. <code>requestViewController</code> needed <code>import CoreAudioKit</code>.</li>
+  <li>Swift 5 language mode with <code>@MainActor</code> models. Switching to Swift 6 strict concurrency will need some <code>Sendable</code> annotations.</li>
+</ul>
+</div>
+<p>Ideas for later: per-app input routing (route an app's microphone), configurable shortcuts, a per-route latency readout, and a mixer view with outputs as columns.</p>
+</main>
+</div>
+</body>
+</html>

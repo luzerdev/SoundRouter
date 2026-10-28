@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode per-user state (the project and shared schemes are checked in)
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Build output
+build/
+DerivedData/
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+*.ipa
+
+# Swift Package Manager
+.build/
+.swiftpm/
